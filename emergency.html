@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Emergency Info</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #fff1f2; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .card { background: white; border-radius: 20px; padding: 32px 24px; max-width: 420px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.10); }
+    .badge { background: #ef4444; color: white; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 99px; display: inline-block; margin-bottom: 16px; }
+    h1 { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .subtitle { font-size: 14px; color: #64748b; margin-bottom: 24px; }
+    .section { background: #f8fafc; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+    .section-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .row:last-child { margin-bottom: 0; }
+    .label { font-size: 13px; color: #64748b; }
+    .value { font-size: 13px; font-weight: 700; color: #0f172a; }
+    .tag { background: #fee2e2; color: #ef4444; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; display: inline-block; margin: 3px 3px 0 0; }
+    .tag.condition { background: #fef3c7; color: #d97706; }
+    .call-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; background: #ef4444; color: white; border: none; border-radius: 14px; font-size: 17px; font-weight: 800; cursor: pointer; text-decoration: none; margin-top: 8px; }
+  </style>
+</head>
+<body>
+<div class="card">
+  <div class="badge">🚨 EMERGENCY INFO</div>
+  <h1 id="name"></h1>
+  <p class="subtitle" id="subtitle"></p>
+
+  <div class="section">
+    <div class="section-title">Medical Details</div>
+    <div class="row"><span class="label">Blood Group</span><span class="value" id="blood"></span></div>
+    <div class="row"><span class="label">Height</span><span class="value" id="height"></span></div>
+    <div class="row"><span class="label">Weight</span><span class="value" id="weight"></span></div>
+    <div class="row"><span class="label">BMI</span><span class="value" id="bmi"></span></div>
+  </div>
+
+  <div class="section" id="allergies-section">
+    <div class="section-title">Allergies</div>
+    <div id="allergies"></div>
+  </div>
+
+  <div class="section" id="conditions-section">
+    <div class="section-title">Existing Conditions</div>
+    <div id="conditions"></div>
+  </div>
+
+  <a class="call-btn" id="call-btn" href="#">📞 Call Emergency Contact</a>
+</div>
+
+<script>
+  const p = new URLSearchParams(window.location.search);
+
+  document.getElementById("name").textContent = p.get("name") || "Unknown";
+  document.getElementById("subtitle").textContent =
+    [p.get("age") ? p.get("age") + " yrs" : "", p.get("gender")].filter(Boolean).join(" · ");
+
+  document.getElementById("blood").textContent = p.get("blood") || "—";
+  document.getElementById("height").textContent = p.get("height") ? p.get("height") + " cm" : "—";
+  document.getElementById("weight").textContent = p.get("weight") ? p.get("weight") + " kg" : "—";
+  document.getElementById("bmi").textContent = p.get("bmi") || "—";
+
+  const allergies = p.get("allergies") ? p.get("allergies").split(",").filter(Boolean) : [];
+  if (allergies.length) {
+    document.getElementById("allergies").innerHTML = allergies.map(a => `<span class="tag">${a}</span>`).join("");
+  } else {
+    document.getElementById("allergies-section").style.display = "none";
+  }
+
+  const conditions = p.get("conditions") ? p.get("conditions").split(",").filter(Boolean) : [];
+  if (conditions.length) {
+    document.getElementById("conditions").innerHTML = conditions.map(c => `<span class="tag condition">${c}</span>`).join("");
+  } else {
+    document.getElementById("conditions-section").style.display = "none";
+  }
+
+  const contact = p.get("contact");
+  if (contact) {
+    document.getElementById("call-btn").href = `tel:${contact}`;
+    document.getElementById("call-btn").textContent = `📞 Call ${contact}`;
+  } else {
+    document.getElementById("call-btn").style.display = "none";
+  }
+</script>
+</body>
+</html>

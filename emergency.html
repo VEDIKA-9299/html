@@ -1,87 +1,420 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Emergency Info</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', sans-serif; background: #fff1f2; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .card { background: white; border-radius: 20px; padding: 32px 24px; max-width: 420px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.10); }
-    .badge { background: #ef4444; color: white; font-size: 13px; font-weight: 700; padding: 4px 14px; border-radius: 99px; display: inline-block; margin-bottom: 16px; }
-    h1 { font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
-    .subtitle { font-size: 14px; color: #64748b; margin-bottom: 24px; }
-    .section { background: #f8fafc; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-    .section-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
-    .row { display: flex; justify-content: space-between; margin-bottom: 6px; }
-    .row:last-child { margin-bottom: 0; }
-    .label { font-size: 13px; color: #64748b; }
-    .value { font-size: 13px; font-weight: 700; color: #0f172a; }
-    .tag { background: #fee2e2; color: #ef4444; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; display: inline-block; margin: 3px 3px 0 0; }
-    .tag.condition { background: #fef3c7; color: #d97706; }
-    .call-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; background: #ef4444; color: white; border: none; border-radius: 14px; font-size: 17px; font-weight: 800; cursor: pointer; text-decoration: none; margin-top: 8px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#8f1d14" />
+<meta name="robots" content="noindex" />
+<title>Emergency Medical Info · MediDocker</title>
+<style>
+  :root {
+    --bg: #f4f6f9; --card: #ffffff; --text: #101828; --muted: #5b6474; --border: #e3e7ed;
+    --primary: #1f5fad; --red: #b42318; --redDark: #8f1d14; --redSoft: #fcedeb;
+    --green: #18794e; --greenSoft: #e8f4ee; --amber: #b25e09; --amberSoft: #fbf1e3;
+    --wa: #128c4a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Inter, "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .top { background: var(--redDark); color: #fff; padding: 14px 16px 54px; }
+  .top-row { max-width: 480px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .top-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; letter-spacing: .6px; }
+  .brand { font-size: 12px; opacity: .8; }
+  main { max-width: 480px; margin: -42px auto 0; padding: 0 12px 28px; display: grid; gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; box-shadow: 0 1px 3px rgba(16,24,40,.06); }
+  .status { display: flex; gap: 10px; align-items: flex-start; border-radius: 10px; padding: 10px 12px; font-size: 13px; line-height: 1.4; margin-bottom: 14px; }
+  .status b { display: block; font-size: 14px; }
+  .status.ok { background: var(--greenSoft); color: var(--green); }
+  .status.bad { background: var(--redSoft); color: var(--red); }
+  .status.old { background: var(--amberSoft); color: var(--amber); }
+  .status svg { flex-shrink: 0; margin-top: 1px; }
+  h1 { font-size: 24px; font-weight: 800; letter-spacing: -.3px; }
+  .sub { color: var(--muted); font-size: 14px; margin-top: 2px; }
+  .tiles { display: grid; grid-template-columns: 1fr 1.4fr; gap: 10px; margin-top: 14px; }
+  .tile { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+  .tile .k { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .tile .v { font-size: 15px; font-weight: 700; margin-top: 4px; }
+  .tile.blood { background: var(--redSoft); border-color: #f4cfca; }
+  .tile.blood .v { font-size: 28px; color: var(--red); line-height: 1.1; }
+  .sec { margin-top: 14px; }
+  .sec-t { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 13px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+  .chip.al { background: var(--redSoft); color: var(--red); }
+  .chip.co { background: var(--amberSoft); color: var(--amber); }
+  .none { font-size: 13px; color: var(--muted); }
+  .contact { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 14px; }
+  .contact .k { color: var(--muted); font-size: 12px; }
+  .contact .v { font-weight: 700; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; border-radius: 12px; padding: 15px 14px; font-size: 16px; font-weight: 700; border: none; cursor: pointer; font-family: inherit; }
+  .btn.wa { background: var(--wa); color: #fff; font-size: 17px; padding: 17px 14px; }
+  .btn.red { background: var(--red); color: #fff; }
+  .btn.line { background: #fff; color: var(--text); border: 1px solid var(--border); font-size: 15px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .actions { display: grid; gap: 10px; }
+  .loc { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #98a2b3; flex-shrink: 0; }
+  .dot.ok { background: var(--green); } .dot.wait { background: var(--amber); } .dot.bad { background: var(--red); }
+  .linkbtn { background: none; border: none; color: var(--primary); font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; padding: 0; }
+  .card h2 { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+  #map { height: 220px; border-radius: 10px; margin-top: 12px; border: 1px solid var(--border); display: none; }
+  .hosp { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .hosp:last-child { border-bottom: none; }
+  .hosp .n { font-size: 14px; font-weight: 600; }
+  .hosp .d { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .hosp-btns { display: flex; gap: 6px; flex-shrink: 0; }
+  .mini { font-size: 12px; font-weight: 600; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: #fff; color: var(--primary); }
+  .note { font-size: 13px; color: var(--muted); margin-top: 10px; line-height: 1.45; }
+  .offline { background: #101828; color: #fff; font-size: 13px; text-align: center; padding: 8px 12px; display: none; }
+  footer { text-align: center; font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .dim { opacity: .55; }
+</style>
 </head>
 <body>
-<div class="card">
-  <div class="badge">🚨 EMERGENCY INFO</div>
-  <h1 id="name"></h1>
-  <p class="subtitle" id="subtitle"></p>
 
-  <div class="section">
-    <div class="section-title">Medical Details</div>
-    <div class="row"><span class="label">Blood Group</span><span class="value" id="blood"></span></div>
-    <div class="row"><span class="label">Height</span><span class="value" id="height"></span></div>
-    <div class="row"><span class="label">Weight</span><span class="value" id="weight"></span></div>
-    <div class="row"><span class="label">BMI</span><span class="value" id="bmi"></span></div>
+<div class="offline" id="offline">You're offline. SMS and calls still work.</div>
+
+<div class="top">
+  <div class="top-row">
+    <div class="top-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      EMERGENCY MEDICAL INFO
+    </div>
+    <div class="brand">MediDocker</div>
   </div>
-
-  <div class="section" id="allergies-section">
-    <div class="section-title">Allergies</div>
-    <div id="allergies"></div>
-  </div>
-
-  <div class="section" id="conditions-section">
-    <div class="section-title">Existing Conditions</div>
-    <div id="conditions"></div>
-  </div>
-
-  <a class="call-btn" id="call-btn" href="#">📞 Call Emergency Contact</a>
 </div>
 
+<main>
+  <section class="card" id="info"></section>
+
+  <section class="card actions" id="actions">
+    <a class="btn wa" id="waBtn" href="#">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.4A8.4 8.4 0 1 1 21 11.5z"/></svg>
+      <span id="waText">Send location on WhatsApp</span>
+    </a>
+    <div class="row2">
+      <a class="btn line" id="smsBtn" href="#">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Send SMS
+      </a>
+      <a class="btn line" id="callBtn" href="#">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+        <span id="callText">Call contact</span>
+      </a>
+    </div>
+    <a class="btn red" href="tel:108">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>
+      Call 108 · Ambulance
+    </a>
+    <div class="loc"><span class="dot" id="locDot"></span><span id="locText">Getting your location…</span>
+      <button class="linkbtn" id="locRetry" style="display:none">Try again</button></div>
+  </section>
+
+  <section class="card" id="hospCard">
+    <h2>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b42318" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-6.6 8-13a8 8 0 0 0-16 0c0 6.4 8 13 8 13z"/><path d="M12 6v6M9 9h6"/></svg>
+      Nearby hospitals
+    </h2>
+    <div id="map"></div>
+    <div id="hospList"></div>
+    <p class="note" id="hospNote">Waiting for location…</p>
+    <a class="mini" id="gmapsLink" style="display:inline-block;margin-top:10px" target="_blank" rel="noopener" href="https://www.google.com/maps/search/hospitals+near+me">Open hospitals in Google Maps</a>
+  </section>
+
+  <footer id="foot"></footer>
+</main>
+
+<script src="nacl-fast.min.js"></script>
 <script>
-  const p = new URLSearchParams(window.location.search);
+(function () {
+  "use strict";
 
-  document.getElementById("name").textContent = p.get("name") || "Unknown";
-  document.getElementById("subtitle").textContent =
-    [p.get("age") ? p.get("age") + " yrs" : "", p.get("gender")].filter(Boolean).join(" · ");
+  // Public half of the MediDocker signing key (backend/keys/emergency-signing-key.pem).
+  // Only MediDocker's server can make a card that passes this check.
+  var PUBLIC_KEY = "o/M7x2lJOLlEipSTDYSmFkEZDNz7A2ZUnPPWfvCjD2E=";
+  var FIELDS = ["n", "a", "g", "b", "h", "w", "m", "al", "c", "ec", "t"];
 
-  document.getElementById("blood").textContent = p.get("blood") || "—";
-  document.getElementById("height").textContent = p.get("height") ? p.get("height") + " cm" : "—";
-  document.getElementById("weight").textContent = p.get("weight") ? p.get("weight") + " kg" : "—";
-  document.getElementById("bmi").textContent = p.get("bmi") || "—";
+  var scannedAt = new Date();
+  var loc = null;
 
-  const allergies = p.get("allergies") ? p.get("allergies").split(",").filter(Boolean) : [];
-  if (allergies.length) {
-    document.getElementById("allergies").innerHTML = allergies.map(a => `<span class="tag">${a}</span>`).join("");
-  } else {
-    document.getElementById("allergies-section").style.display = "none";
+  // ── helpers ─────────────────────────────────────────────
+  function $(id) { return document.getElementById(id); }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) e.textContent = text; // never innerHTML with card data
+    return e;
+  }
+  function b64ToBytes(s) {
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    var bin = atob(s), out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function fromPayload(str) {
+    var parts = str.split("|"), card = {};
+    FIELDS.forEach(function (k, i) {
+      var v = parts[i] || "";
+      card[k] = (k === "al" || k === "c") ? v.split(",").filter(Boolean) : v;
+    });
+    return card;
+  }
+  function splitList(v) { return (v || "").split(",").map(function (s) { return s.trim(); }).filter(Boolean); }
+
+  // Indian numbers: 10 digits -> add 91; leading 0 -> 91
+  function intlNumber(raw) {
+    var d = String(raw || "").replace(/\D/g, "");
+    if (d.indexOf("00") === 0) d = d.slice(2);
+    if (d.length === 11 && d[0] === "0") d = d.slice(1);
+    if (d.length === 10) d = "91" + d;
+    return d.length >= 8 ? d : "";
   }
 
-  const conditions = p.get("conditions") ? p.get("conditions").split(",").filter(Boolean) : [];
-  if (conditions.length) {
-    document.getElementById("conditions").innerHTML = conditions.map(c => `<span class="tag condition">${c}</span>`).join("");
-  } else {
-    document.getElementById("conditions-section").style.display = "none";
+  // ── read + verify the card ──────────────────────────────
+  function readCard() {
+    var hash = "";
+    try { hash = decodeURIComponent(location.hash.slice(1)).trim(); } catch (e) { hash = location.hash.slice(1); }
+
+    if (hash) {
+      try {
+        var bytes = b64ToBytes(hash);
+        if (bytes[0] !== 1 || bytes.length < 66) return { status: "bad" };
+        var sig = bytes.slice(1, 65), payload = bytes.slice(65);
+        var card = fromPayload(new TextDecoder().decode(payload));
+        if (!window.nacl) return { status: "unknown", card: card };
+        var ok = nacl.sign.detached.verify(payload, sig, b64ToBytes(PUBLIC_KEY));
+        return { status: ok ? "ok" : "bad", card: card };
+      } catch (e) {
+        return { status: "bad" };
+      }
+    }
+
+    // Wallpapers made before this update used ?name=...&blood=...
+    var q = new URLSearchParams(location.search);
+    if (q.get("name")) {
+      return {
+        status: "old",
+        card: {
+          n: q.get("name"), a: q.get("age"), g: q.get("gender"), b: q.get("blood"),
+          h: q.get("height"), w: q.get("weight"), m: q.get("bmi"),
+          al: splitList(q.get("allergies")), c: splitList(q.get("conditions")), ec: q.get("contact"), t: ""
+        }
+      };
+    }
+    return { status: "empty" };
   }
 
-  const contact = p.get("contact");
-  if (contact) {
-    document.getElementById("call-btn").href = `tel:${contact}`;
-    document.getElementById("call-btn").textContent = `📞 Call ${contact}`;
-  } else {
-    document.getElementById("call-btn").style.display = "none";
+  var res = readCard();
+  var card = res.card || {};
+
+  // ── render card ─────────────────────────────────────────
+  var STATUS = {
+    ok: ["ok", "Verified by MediDocker", "This card is genuine and has not been changed."],
+    bad: ["bad", "Fake or edited card", "This card failed the security check. The details below may be wrong. Call 108 if needed."],
+    old: ["old", "Old card (not verified)", "Made before MediDocker added verification. Ask the owner to download a new wallpaper."],
+    unknown: ["old", "Couldn't verify on this phone", "The details are shown as written on the card."],
+    empty: ["bad", "No emergency card found", "This link doesn't contain any card data. Call 108 if someone needs help."]
+  };
+  var ICON = {
+    ok: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>',
+    bad: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>'
+  };
+
+  var info = $("info");
+  var st = STATUS[res.status];
+  var box = el("div", "status " + st[0]);
+  var ic = el("span"); ic.innerHTML = res.status === "ok" ? ICON.ok : ICON.bad; // static icon only
+  var txt = el("div"); txt.appendChild(el("b", null, st[1])); txt.appendChild(document.createTextNode(st[2]));
+  box.appendChild(ic); box.appendChild(txt);
+  info.appendChild(box);
+
+  if (res.status !== "empty" && card.n !== undefined) {
+    var body = el("div", res.status === "bad" ? "dim" : "");
+    body.appendChild(el("h1", null, card.n || "Name not given"));
+    var sub = [card.a ? card.a + " yrs" : "", card.g || ""].filter(Boolean).join(" · ");
+    if (sub) body.appendChild(el("div", "sub", sub));
+
+    var tiles = el("div", "tiles");
+    var t1 = el("div", "tile blood"); t1.appendChild(el("div", "k", "Blood group")); t1.appendChild(el("div", "v", card.b || "—"));
+    var bodyFacts = [card.h ? card.h + " cm" : "", card.w ? card.w + " kg" : "", card.m ? "BMI " + card.m : ""].filter(Boolean).join(" · ");
+    var t2 = el("div", "tile"); t2.appendChild(el("div", "k", "Body")); t2.appendChild(el("div", "v", bodyFacts || "—"));
+    tiles.appendChild(t1); tiles.appendChild(t2);
+    body.appendChild(tiles);
+
+    function chipSection(title, items, cls, emptyText) {
+      var s = el("div", "sec"); s.appendChild(el("div", "sec-t", title));
+      if (items && items.length) {
+        var c = el("div", "chips");
+        items.forEach(function (x) { c.appendChild(el("span", "chip " + cls, x)); });
+        s.appendChild(c);
+      } else s.appendChild(el("div", "none", emptyText));
+      return s;
+    }
+    body.appendChild(chipSection("Allergies", card.al, "al", "No known allergies"));
+    body.appendChild(chipSection("Medical conditions", card.c, "co", "None listed"));
+
+    var ct = el("div", "contact");
+    var cl = el("div"); cl.appendChild(el("div", "k", "Emergency contact")); cl.appendChild(el("div", "v", card.ec || "Not given"));
+    ct.appendChild(cl);
+    body.appendChild(ct);
+    info.appendChild(body);
   }
+
+  // ── contact buttons ─────────────────────────────────────
+  var number = intlNumber(card.ec);
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  function mapsLink() { return loc ? "https://maps.google.com/?q=" + loc.lat.toFixed(5) + "," + loc.lng.toFixed(5) : ""; }
+  function message() {
+    var when = scannedAt.toLocaleString("en-IN", { hour: "numeric", minute: "2-digit", day: "numeric", month: "short" });
+    var lines = [
+      "EMERGENCY - MediDocker alert",
+      (card.n || "Your contact") + "'s emergency medical QR was scanned at " + when + ".",
+      loc ? "Location: " + mapsLink() : "Location: not available (location was turned off)",
+    ];
+    if (card.b) lines.push("Blood group: " + card.b);
+    lines.push("Please call back now.");
+    return lines.join("\n");
+  }
+  function refreshLinks() {
+    var msg = encodeURIComponent(message());
+    $("waBtn").href = "https://wa.me/" + number + "?text=" + msg;
+    $("smsBtn").href = "sms:+" + number + (isIOS ? "&" : "?") + "body=" + msg;
+    $("callBtn").href = "tel:+" + number;
+  }
+
+  if (number && res.status !== "empty") {
+    refreshLinks();
+    ["waBtn", "smsBtn"].forEach(function (id) { $(id).addEventListener("click", refreshLinks); });
+  } else {
+    $("waBtn").style.display = "none";
+    $("smsBtn").parentNode.style.display = "none";
+  }
+
+  // ── location ────────────────────────────────────────────
+  function setLoc(state, text) {
+    $("locDot").className = "dot " + state;
+    $("locText").textContent = text;
+    $("locRetry").style.display = state === "bad" ? "inline" : "none";
+  }
+  function askLocation() {
+    if (!navigator.geolocation) { setLoc("bad", "Location not supported. Message will be sent without it."); hospNoLocation(); return; }
+    setLoc("wait", "Getting your location…");
+    navigator.geolocation.getCurrentPosition(function (p) {
+      loc = { lat: p.coords.latitude, lng: p.coords.longitude, acc: Math.round(p.coords.accuracy) };
+      setLoc("ok", "Location ready (±" + loc.acc + " m). It will be added to the message.");
+      if (number) refreshLinks();
+      loadHospitals();
+    }, function (err) {
+      setLoc("bad", err.code === 1 ? "Location blocked. Allow it so family can find you." : "Couldn't get location.");
+      hospNoLocation();
+    }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+  }
+  $("locRetry").addEventListener("click", askLocation);
+
+  // ── nearby hospitals (OpenStreetMap) ────────────────────
+  function hospNoLocation() { $("hospNote").textContent = "Turn on location to see the nearest hospitals."; }
+
+  function km(a, b) {
+    var R = 6371, toR = Math.PI / 180;
+    var dLat = (b.lat - a.lat) * toR, dLng = (b.lng - a.lng) * toR;
+    var h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * toR) * Math.cos(b.lat * toR) * Math.sin(dLng / 2) ** 2;
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function fetchHospitals(radius) {
+    var q = '[out:json][timeout:20];nwr["amenity"="hospital"](around:' + radius + "," + loc.lat + "," + loc.lng + ");out center 40;";
+    return fetch("https://overpass-api.de/api/interpreter", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "data=" + encodeURIComponent(q)
+    }).then(function (r) { if (!r.ok) throw new Error("overpass " + r.status); return r.json(); })
+      .then(function (j) {
+        return (j.elements || []).map(function (e) {
+          var p = e.center || e;
+          var tags = e.tags || {};
+          return { name: tags.name || "Hospital", lat: p.lat, lng: p.lon, phone: tags.phone || tags["contact:phone"] || "" };
+        }).filter(function (h) { return h.lat && h.lng; })
+          .map(function (h) { h.km = km(loc, h); return h; })
+          .sort(function (a, b) { return a.km - b.km; });
+      });
+  }
+
+  function loadHospitals() {
+    $("gmapsLink").href = "https://www.google.com/maps/search/hospitals/@" + loc.lat + "," + loc.lng + ",14z";
+    if (!navigator.onLine) { $("hospNote").textContent = "Hospital list needs internet. Call 108 for an ambulance."; return; }
+    $("hospNote").textContent = "Finding hospitals near you…";
+
+    fetchHospitals(5000).then(function (list) {
+      return list.length >= 3 ? list : fetchHospitals(15000);
+    }).then(function (list) {
+      var top = list.slice(0, 5);
+      var box = $("hospList");
+      box.textContent = "";
+      if (!top.length) { $("hospNote").textContent = "No hospitals found nearby on the map. Use Google Maps below."; return; }
+      $("hospNote").textContent = "";
+      top.forEach(function (h) {
+        var row = el("div", "hosp");
+        var l = el("div"); l.appendChild(el("div", "n", h.name)); l.appendChild(el("div", "d", h.km.toFixed(1) + " km away"));
+        var b = el("div", "hosp-btns");
+        var dir = el("a", "mini", "Directions");
+        dir.href = "https://www.google.com/maps/dir/?api=1&destination=" + h.lat + "," + h.lng;
+        dir.target = "_blank"; dir.rel = "noopener";
+        b.appendChild(dir);
+        if (h.phone) { var c = el("a", "mini", "Call"); c.href = "tel:" + h.phone.split(/[;,]/)[0].replace(/[^\d+]/g, ""); b.appendChild(c); }
+        row.appendChild(l); row.appendChild(b);
+        box.appendChild(row);
+      });
+      drawMap(top);
+    }).catch(function () {
+      $("hospNote").textContent = "Couldn't load the hospital list. Use Google Maps below.";
+    });
+  }
+
+  function drawMap(list) {
+    var css = document.createElement("link");
+    css.rel = "stylesheet";
+    css.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    document.head.appendChild(css);
+    var s = document.createElement("script");
+    s.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+    s.onload = function () {
+      $("map").style.display = "block";
+      var map = L.map("map", { zoomControl: false, attributionControl: true }).setView([loc.lat, loc.lng], 13);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
+      L.circleMarker([loc.lat, loc.lng], { radius: 8, color: "#1f5fad", fillColor: "#1f5fad", fillOpacity: 0.9 }).addTo(map).bindPopup("You are here");
+      var pts = [[loc.lat, loc.lng]];
+      list.forEach(function (h) {
+        L.marker([h.lat, h.lng]).addTo(map).bindPopup(document.createTextNode(h.name));
+        pts.push([h.lat, h.lng]);
+      });
+      map.fitBounds(pts, { padding: [24, 24], maxZoom: 15 });
+    };
+    document.head.appendChild(s);
+  }
+
+  // ── footer, offline banner, offline cache ───────────────
+  var foot = [];
+  if (card.t) {
+    var made = new Date(parseInt(card.t, 36) * 1000);
+    if (!isNaN(made)) foot.push("Card made " + made.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }));
+  }
+  if (res.status === "ok") foot.push("Protected with a digital signature");
+  foot.push("MediDocker · Personal health records");
+  foot.forEach(function (line) { $("foot").appendChild(el("div", null, line)); });
+
+  function onlineState() { $("offline").style.display = navigator.onLine ? "none" : "block"; }
+  window.addEventListener("online", onlineState);
+  window.addEventListener("offline", onlineState);
+  onlineState();
+
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  }
+
+  askLocation();
+})();
 </script>
 </body>
 </html>
